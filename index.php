@@ -1,5 +1,5 @@
 <?php
-include 'autoload.php';
+include __DIR__ . '/vendor/autoload.php';
 
 use Helpers\DataGenerator;
 use JsBuilder\DevExtremeGridThemes;
@@ -20,15 +20,14 @@ $tableName = "gridView_test";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <?= DevExtremeGridBuilder::SetTheme(DevExtremeGridThemes::MaterialOrangeLight)
-        ->SetLang(\JsBuilder\DevExtremeLanguage::$Turkish)
+        ->SetLang(\JsBuilder\DevExtremeLanguage::Turkish)
         ->GetJavaScriptLibrary() ?>
 
     <title>JSBuilder</title>
 </head>
-<body>
-<!-- Optional JavaScript; choose one of the two! -->
-<div class="card m-5 border">
-    <h5 class="h5 m-3">DevExtreme PHP</h5>
+<body class="bg-white">
+<div class="card m-5 border shadow rounded">
+    <h5 class="h5 m-3">PHP-DevExtremeGridBuilder</h5>
     <div class="p-3" id="<?= $tableName ?>"></div>
 </div>
 
@@ -43,6 +42,7 @@ $tableName = "gridView_test";
         ->dataSource($ds)
         ->Build(); ?>
 </script>
+
 <!-- Option 1: Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

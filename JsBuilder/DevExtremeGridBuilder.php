@@ -48,7 +48,7 @@ class DevExtremeGridBuilder
             if (strpos($value, ".js")) {
                 $template = ' <script type="text/javascript" src="{{link}}"></script>' . PHP_EOL;
             } else {
-                $template = ' <link rel="stylesheet" href="{{link}}">';
+                $template = ' <link rel="stylesheet" href="{{link}}">' . PHP_EOL;
             }
 
             $headString = $headString . str_replace("{{link}}", $value, $template);
