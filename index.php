@@ -1,5 +1,10 @@
 <?php
-include "JSBuilder.php";
+function class_autoloader($class) {
+    include  $class . '.class.php';
+}
+
+spl_autoload_register('class_autoloader');
+
 use JsBuilder\DevExtremeGridThemes;
 use JsBuilder\DevExtremeGridBuilder;
 

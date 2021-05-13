@@ -1,6 +1,0 @@
-$(document).ready(function() {
-    var table =    $('#{{tableName}}').DataTable( {
-                        data: {{dataSource}},
-                        columns: {{columns}}
-                    } );
-} );
