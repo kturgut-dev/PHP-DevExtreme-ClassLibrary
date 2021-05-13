@@ -2,25 +2,45 @@
 
 namespace JsBuilder;
 
+use DevExtreme\DxColumn;
+use DevExtreme\DxThemes;
+use mysql_xdevapi\Exception;
+
 class DevExtremeGridBuilder
 {
-    private static $devextremeGrid = "";
-    private static $typePath = "JsBuilder/DevExtremeGrid.txt";
-    private static $theme = DevExtremeGridThemes::Light;
-    private static $replaceData = array(
+    // [START] Variables
+    private static string $devextremeGrid = "";
+    private static string $theme = DxThemes::Light;
+    private static array $replaceData = array(
         "tableName" => "tableName",
     );
-    private static $columns = array();
-    public static $lang = "en";
-    public static $DevExtremeGridLibs = array(
+    private static array $columns = array();
+    public static string $lang = "en";
+    private static array $DevExtremeGridLibs = array(
         "https://cdn3.devexpress.com/jslib/20.2.7/css/dx.common.css",
         "https://cdn3.devexpress.com/jslib/20.2.7/js/dx.all.js",
     );
-    public static $DevExtremeGridForm = array();
+    private static array $DevExtremeGridForm = array();
+    // [END]
+
+    // [START] Custom Operations
+    public static function GetJavaScriptLibrary(): string
+    {
+        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/css/" . self::$theme);
+        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/js/localization/dx.messages." . self::$lang . ".js");
+        return self::GenerateJavaScriptLibrary(self::$DevExtremeGridLibs);
+    }
 
     public static function SetLang(string $lang)
     {
         self::$lang = $lang;
+        return new self();
+    }
+
+    public static function SetTheme(string $theme = '')
+    {
+        if (!is_null($theme) && !empty(trim($theme)))
+            self::$theme = $theme;
         return new self();
     }
 
@@ -29,14 +49,7 @@ class DevExtremeGridBuilder
         self::$devextremeGrid = '$(function(){' . PHP_EOL;
         self::$devextremeGrid .= 'DevExpress.localization.locale(navigator.language);' . PHP_EOL;
         self::$devextremeGrid .= 'var {{tableName}} = $("#{{tableName}}").dxDataGrid({{DevExtremeGridFormat}});' . PHP_EOL;
-        self::$devextremeGrid .= '})//.dxDataGrid("instance");';
-    }
-
-    public static function GetJavaScriptLibrary(): string
-    {
-        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/css/" . self::$theme);
-        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/js/localization/dx.messages." . self::$lang . ".js");
-        return self::GenerateJavaScriptLibrary(self::$DevExtremeGridLibs);
+        self::$devextremeGrid .= '})//.dxDataGrid(\'instance\');';
     }
 
     private static function GenerateJavaScriptLibrary(array $libraries): string
@@ -57,8 +70,7 @@ class DevExtremeGridBuilder
         return $headString;
     }
 
-    private
-    static function Grid_Refresh()
+    private static function Grid_Refresh()
     {
         foreach (self::$DevExtremeGridForm as $key => $value) {
             self::$DevExtremeGridForm[$key] = ($value);
@@ -73,57 +85,25 @@ class DevExtremeGridBuilder
         self::$devextremeGrid = $grid;
     }
 
-    public static function Create(string $tableName): self
+    public static function Create(string $tableName, string $key = ''): self
     {
         self::$replaceData["tableName"] = $tableName;
+
+        if (is_string($key) && !empty($key))
+            self::$DevExtremeGridForm["keyExpr"] = $key;
+
         return new self();
     }
 
-    public static function SetTheme(string $theme = '')
+    public static function Build(): string
     {
-        if (!is_null($theme) && !empty(trim($theme)))
-            self::$theme = $theme;
-        return new self();
+        self::Initialize_DevExtreme();
+        self::Grid_Refresh();
+        return self::$devextremeGrid;
     }
+    // [END]
 
-    public static function setColumns(array $columns): self
-    {
-        self::$DevExtremeGridForm["columns"] = $columns;
-        return new self();
-    }
-
-    public static function addColumn(string $fieldName, string $displayName, int $width = 0, bool $visible = true, string $dataType = 'string'): self
-    {
-        $col = array(
-            "dataField" => $fieldName,
-            "caption" => $displayName,
-            "visible" => $visible,
-        );
-
-        if ($dataType != 'string') {
-            $col["dataType"] = $dataType;
-        }
-
-        if ($width != 0) {
-            $col["width"] = $width;
-        }
-
-        array_push(self::$columns, $col);
-        self::$DevExtremeGridForm["columns"] = (self::$columns);
-        return new self();
-    }
-
-    public static function dataSource(array $dataSource): self
-    {
-        self::$DevExtremeGridForm["dataSource"] = $dataSource;
-        return new self();
-    }
-
-    public static function setKeyExpr(string $key)
-    {
-        self::$DevExtremeGridForm["keyExpr"] = $key;
-        return new self();
-    }
+    // [START] DataGridView Operations
 
     public static function SearchPanel(bool $visible = true, int $width = 240, string $placeHolder = "")
     {
@@ -137,9 +117,64 @@ class DevExtremeGridBuilder
         return new self();
     }
 
-    public static function AllowColumnReordering(bool $visible)
+    public static function JsonDataSource(array $dataSource): self
     {
-        self::$DevExtremeGridForm["groupingAutoExpandAll"] = $visible;
+        self::$DevExtremeGridForm["dataSource"] = $dataSource;
+        return new self();
+    }
+
+    public static function AddColumn(string $fieldName, string $displayName, int $width = 0, bool $visible = true, string $dataType = 'string', int $groupIndex = -1, string $sortOrder = ''): self
+    {
+        $col = array(
+            "dataField" => $fieldName,
+            "caption" => $displayName,
+        );
+
+        if ($dataType != 'string') {
+            $col["dataType"] = $dataType;
+        }
+
+        if (!$visible) {
+            $col["visible"] = $visible;;
+        }
+
+        if ($width != 0) {
+            $col["width"] = $width;
+        }
+
+        if ($groupIndex != -1) {
+            $col["groupIndex"] = $groupIndex;
+        }
+
+        if (!empty($sortOrder))
+            $col["sortOrder"] = $sortOrder; //asc - desc
+
+        array_push(self::$columns, $col);
+        self::$DevExtremeGridForm["columns"] = (self::$columns);
+        return new self();
+    }
+
+    public static function AddDxColumn(DxColumn $dxColumn): self
+    {
+//        $col = (array) $dxColumn;
+//        echo $dxColumn->jsonSerialize();
+//        echo print_r((array) $dxColumn);
+
+        array_push(self::$columns, $dxColumn->getColumn());
+        self::$DevExtremeGridForm["columns"] = (self::$columns);
+        return new self();
+    }
+
+
+    public static function AllowColumnReordering(bool $visible = true): self
+    {
+        self::$DevExtremeGridForm["allowColumnReordering"] = $visible;
+        return new self();
+    }
+
+    public static function AddColumns(array $columns): self
+    {
+        self::$DevExtremeGridForm["columns"] = $columns;
         return new self();
     }
 
@@ -151,10 +186,53 @@ class DevExtremeGridBuilder
         return new self();
     }
 
-    public static function Build()
+    public static function FilterRow(bool $visible, string $applyFilter = "auto"): self
     {
-        self::Initialize_DevExtreme();
-        self::Grid_Refresh();
-        return self::$devextremeGrid;
+        self::$DevExtremeGridForm["filterRow"]["visible"] = $visible;
+        if (!empty($applyFilter) && is_string($applyFilter))
+            self::$DevExtremeGridForm["filterRow"]["applyFilter"] = $applyFilter;
+        return new self();
     }
+
+    public static function HeaderFilter(bool $visible): self
+    {
+        self::$DevExtremeGridForm["headerFilter"]["visible"] = $visible;
+        return new self();
+    }
+
+    public static function FilterPanel(bool $visible = true): self
+    {
+        self::$DevExtremeGridForm["filterPanel"]["visible"] = $visible;
+        return new self();
+    }
+
+    public static function Paging(int $pageSize = 10): self
+    {
+        if (is_integer($pageSize))
+            self::$DevExtremeGridForm["paging"]["pageSize"] = $pageSize;
+        return new self();
+    }
+
+    public static function Pager(bool $showPageSizeSelector = true, array $allowedPageSizes = array(5, 10, 20), bool $showInfo = true): self
+    {
+        self::$DevExtremeGridForm["pager"]["showPageSizeSelector"] = $showPageSizeSelector;
+
+        if (is_array($allowedPageSizes)) {
+            foreach ($allowedPageSizes as $allowedPageSize) {
+                if (!is_integer($allowedPageSize))
+                    throw  new Exception("Variable must be integer array.");
+            }
+            self::$DevExtremeGridForm["pager"]["allowedPageSizes"] = $allowedPageSizes;
+        }
+        self::$DevExtremeGridForm["pager"]["showInfo"] = $showInfo;
+        return new self();
+    }
+
+    public static function FocusedRowEnabled(bool $isActive = true): self
+    {
+        if (is_bool($isActive))
+            self::$DevExtremeGridForm["focusedRowEnabled"] = $isActive;
+        return new self();
+    }
+    // [END]
 }

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace JsBuilder;
+namespace DevExtreme;
 
-class DevExtremeLanguage
+class DxLanguage
 {
     const English = "en";
     const Turkish = "tr";

@@ -2,10 +2,12 @@
 include __DIR__ . '/vendor/autoload.php';
 
 use Helpers\DataGenerator;
-use JsBuilder\DevExtremeGridThemes;
+use DevExtreme\DxThemes;
+use DevExtreme\DxColumn;
+use DevExtreme\DxLanguage;
 use JsBuilder\DevExtremeGridBuilder;
 
-$ds = DataGenerator::DataSourceGenerate(1);
+$ds = DataGenerator::DataSourceGenerate(20);
 
 $tableName = "gridView_test";
 ?>
@@ -19,28 +21,43 @@ $tableName = "gridView_test";
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <?= DevExtremeGridBuilder::SetTheme(DevExtremeGridThemes::MaterialOrangeLight)
-        ->SetLang(\JsBuilder\DevExtremeLanguage::Turkish)
+    <?= DevExtremeGridBuilder::SetTheme(DxThemes::MaterialOrangeLight)
+        ->SetLang(DxLanguage::Turkish)
         ->GetJavaScriptLibrary() ?>
 
     <title>JSBuilder</title>
 </head>
 <body class="bg-white">
+
 <div class="card m-5 border shadow rounded">
     <h5 class="h5 m-3">PHP-DevExtremeGridBuilder</h5>
+    <span class="m-3">Focused Row Key: <span id="focusedRow">NULL</span></span>
     <div class="p-3" id="<?= $tableName ?>"></div>
 </div>
 
 <script>
-    <?php echo DevExtremeGridBuilder::Create($tableName)
-        ->setKeyExpr("Id")
-        ->SearchPanel(true)
+    <?php echo DevExtremeGridBuilder::Create($tableName, 'Id')
+        ->SearchPanel()
         ->GroupPanel(true)
-        ->addColumn("Id", "Id")
-        ->addColumn("FullName", "Name and Surname")
-        ->addColumn("Email", "E-mail")
-        ->dataSource($ds)
+        ->FilterRow(true)
+        ->FilterPanel()
+        ->Paging(10)
+        ->Pager(true)
+        ->FocusedRowEnabled()
+        ->HeaderFilter(true)
+        ->AddDxColumn(new DxColumn("Id", "Kayıt No"))
+        ->AddColumn("FullName", "Name and Surname")
+        ->AddColumn("Email", "E-mail")
+        ->JsonDataSource($ds)
         ->Build(); ?>
+
+
+    $("#gridView_test").dxDataGrid({
+        onFocusedRowChanged: function (e) {
+            const focusedRowKey = e.component.option("focusedRowKey");
+            $("#focusedRow").text(focusedRowKey);
+        }
+    });
 </script>
 
 <!-- Option 1: Bootstrap Bundle with Popper -->

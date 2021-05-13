@@ -1,8 +1,8 @@
 <?php
 
-namespace JsBuilder;
+namespace DevExtreme;
 
-class DevExtremeGridThemes
+class DxThemes
 {
 //Generic
     const Light = "dx.light.css";

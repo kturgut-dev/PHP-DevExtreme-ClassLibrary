@@ -136,9 +136,10 @@ class DataGenerator
     {
         $ds = array();
         for ($i = 1; $i <= $count; $i++) {
+            $int = rand(1,200);
             $name = DataGenerator::FakeNameAndSurname();
             array_push($ds, array(
-                "Id" => "$i",
+                "Id" => "$int",
                 "Email" => DataGenerator::MailConvert($name),
                 "FullName" => $name
             ));
