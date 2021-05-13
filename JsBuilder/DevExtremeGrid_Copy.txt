@@ -1,6 +1,7 @@
 $(function(){
+     DevExpress.localization.locale(navigator.language);
      var {{tableName}} = $("#{{tableName}}").dxDataGrid({
-            dataSource: {{dataSource}},
+        dataSource: {{dataSource}},
         columns: {{columns}},
         focusedRowEnabled: {{focusedRowEnabled}},
         keyExpr: "{{keyExpr}}",

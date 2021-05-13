@@ -9,42 +9,34 @@ class DevExtremeGridBuilder
     private static $theme = DevExtremeGridThemes::Light;
     private static $replaceData = array(
         "tableName" => "tableName",
-        "dataSource" => "[]",
-        "columns" => "[]",
-        "keyExpr" => "Id",
-        "searchPanelVisible" => true,
-        "searchPanelWidth" => 240,
-        "searchPanelPlaceHolder" => "Search...",
-        "headerFilterVisible" => true,
-        "showBorders" => true,
-        "columnsAutoWidth" => true,
-        "focusedRowEnabled" => true,
-        "filterRowVisible" => true,
-        "filterRowApplyFilter" => "auto",
-        "groupingAutoExpandAll" => true,
-        "groupPanelVisible" => true,
-        "groupPanelEmptyPanelText" => "Drag a column header here to group by that column",
     );
     private static $columns = array();
+    public static $lang = "en";
+    public static $DevExtremeGridLibs = array(
+        "https://cdn3.devexpress.com/jslib/20.2.7/css/dx.common.css",
+        "https://cdn3.devexpress.com/jslib/20.2.7/js/dx.all.js",
+    );
+    public static $DevExtremeGridForm = array();
 
-    private static function readTxtFile()
+    public static function SetLang(string $lang)
     {
-        $filename = self::$typePath;
-        $fp = fopen($filename, "r");
+        self::$lang = $lang;
+        return new self();
+    }
 
-        self::$devextremeGrid = fread($fp, filesize($filename));
-        fclose($fp);
+    private static function Initialize_DevExtreme()
+    {
+        self::$devextremeGrid = '$(function(){' . PHP_EOL;
+        self::$devextremeGrid .= 'DevExpress.localization.locale(navigator.language);' . PHP_EOL;
+        self::$devextremeGrid .= 'var {{tableName}} = $("#{{tableName}}").dxDataGrid({{DevExtremeGridFormat}});' . PHP_EOL;
+        self::$devextremeGrid .= '})//.dxDataGrid("instance");';
     }
 
     public static function GetJavaScriptLibrary(): string
     {
-        $DevExtremeGridLibs = array(
-            "https://cdn3.devexpress.com/jslib/20.2.7/css/dx.common.css",
-            "https://cdn3.devexpress.com/jslib/20.2.7/css/" . self::$theme,
-            "https://cdn3.devexpress.com/jslib/20.2.7/js/dx.all.js",
-        );
-
-        return self::GenerateJavaScriptLibrary($DevExtremeGridLibs);
+        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/css/" . self::$theme);
+        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/js/localization/dx.messages." . self::$lang . ".js");
+        return self::GenerateJavaScriptLibrary(self::$DevExtremeGridLibs);
     }
 
     private static function GenerateJavaScriptLibrary(array $libraries): string
@@ -66,46 +58,41 @@ class DevExtremeGridBuilder
     }
 
     private
-    static function refreshGrid()
+    static function Grid_Refresh()
     {
-        self::$replaceData["columns"] = json_encode(self::$columns);
-
-        $rows = self::$replaceData;
-        $grid = self::$devextremeGrid;
-
-        foreach ($rows as $key => $value) {
-            // echo $key. " - ". $value . "<br>";
-            $grid = str_replace("{{" . $key . "}}", $value, $grid);
+        foreach (self::$DevExtremeGridForm as $key => $value) {
+            self::$DevExtremeGridForm[$key] = ($value);
         }
 
+        $grid = self::$devextremeGrid;
+
+        $grid = str_replace("{{DevExtremeGridFormat}}", json_encode(self::$DevExtremeGridForm), $grid);
+        foreach (self::$replaceData as $key => $value) {
+            $grid = str_replace("{{" . $key . "}}", $value, $grid);
+        }
         self::$devextremeGrid = $grid;
     }
 
-    public
-    static function createTable(string $tableName)
+    public static function Create(string $tableName): self
     {
         self::$replaceData["tableName"] = $tableName;
         return new self();
     }
 
-    public static function setTheme(string $theme = '')
+    public static function SetTheme(string $theme = '')
     {
-        if (!empty($theme))
+        if (!is_null($theme) && !empty(trim($theme)))
             self::$theme = $theme;
         return new self();
     }
 
-    public
-    static function setColumns(array $columns)
+    public static function setColumns(array $columns): self
     {
-        //test edilecek
-        $out = json_encode(($columns));
-        self::$replaceData["columns"] = $out;
+        self::$DevExtremeGridForm["columns"] = $columns;
         return new self();
     }
 
-    public
-    static function addColumn(string $fieldName, string $displayName, int $width = 0, bool $visible = true, string $dataType = 'string')
+    public static function addColumn(string $fieldName, string $displayName, int $width = 0, bool $visible = true, string $dataType = 'string'): self
     {
         $col = array(
             "dataField" => $fieldName,
@@ -122,50 +109,52 @@ class DevExtremeGridBuilder
         }
 
         array_push(self::$columns, $col);
-        // echo json_encode(($col));
+        self::$DevExtremeGridForm["columns"] = (self::$columns);
         return new self();
     }
 
-    public
-    static function dataSource(array $dataSource)
+    public static function dataSource(array $dataSource): self
     {
-        $out = json_encode($dataSource);
-        self::$replaceData["dataSource"] = $out;
+        self::$DevExtremeGridForm["dataSource"] = $dataSource;
         return new self();
     }
 
     public static function setKeyExpr(string $key)
     {
-        self::$replaceData["keyExpr"] = $key;
+        self::$DevExtremeGridForm["keyExpr"] = $key;
         return new self();
     }
 
-    public static function SearchPanel(bool $visible = true, int $width = 240, string $placeHolder = "Search...")
+    public static function SearchPanel(bool $visible = true, int $width = 240, string $placeHolder = "")
     {
-        self::$replaceData["searchPanelVisible"] = $visible;
-        self::$replaceData["searchPanelWidth"] = $width;
-        self::$replaceData["searchPanelPlaceHolder"] = $placeHolder;
+        if (is_bool($visible))
+            self::$DevExtremeGridForm["searchPanel"]["visible"] = $visible;
+        if (is_integer($width))
+            self::$DevExtremeGridForm["searchPanel"]["width"] = $width;
+        if (!empty($placeHolder))
+            array_push(self::$DevExtremeGridForm["searchPanel"], ["placeholder" => $placeHolder]);
+
         return new self();
     }
 
     public static function AllowColumnReordering(bool $visible)
     {
-        self::$replaceData["groupingAutoExpandAll"] = $visible;
+        self::$DevExtremeGridForm["groupingAutoExpandAll"] = $visible;
         return new self();
     }
 
-    public static function GroupPanel(string $emptyText, bool $visible)
+    public static function GroupPanel(bool $visible, string $emptyText = '')
     {
-        self::$replaceData["groupPanelVisible"] = $visible;
-        self::$replaceData["groupPanelEmptyPanelText"] = $emptyText;
+        self::$DevExtremeGridForm["groupPanel"]["visible"] = $visible;
+        if (!empty($emptyText) && is_string($emptyText))
+            self::$DevExtremeGridForm["groupPanel"]["emptyPanelText"] = $emptyText;
         return new self();
     }
 
-    public
-    static function make()
+    public static function Build()
     {
-        self::readTxtFile();
-        self::refreshGrid();
+        self::Initialize_DevExtreme();
+        self::Grid_Refresh();
         return self::$devextremeGrid;
     }
 }
