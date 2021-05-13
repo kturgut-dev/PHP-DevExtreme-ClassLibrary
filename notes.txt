@@ -1,0 +1,2 @@
+https://js.devexpress.com/Documentation/ApiReference/Data_Layer/CustomStore/
+https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/RowEditingAndEditingEvents/jQuery/Light/

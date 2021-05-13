@@ -9,9 +9,6 @@ use JsBuilder\DevExtremeGridBuilder;
 
 
 $tableName = "gridView_test";
-
-$idColumn =  new DxColumn("Id", "Kayıt No");
-$idColumn->AllowEditing = false;
 ?>
 <!doctype html>
 <html lang="en">
@@ -38,7 +35,7 @@ $idColumn->AllowEditing = false;
 </div>
 
 <script>
-    <?php echo DevExtremeGridBuilder::Create($tableName)
+    <?php echo DevExtremeGridBuilder::Create($tableName, 'Id')
         ->SearchPanel()
         ->FilterPanel()
         ->GroupPanel()
@@ -47,34 +44,27 @@ $idColumn->AllowEditing = false;
         ->Pager(true)
         ->FocusedRowEnabled()
         ->HeaderFilter(true)
-        ->Editing(true,true)
-        ->RemoteOperations(true)
-        ->EditingMode("cell")
-        ->AddDxColumn($idColumn)
+        ->AddDxColumn(new DxColumn("Id", "Kayıt No"))
         ->AddColumn("FullName", "Name and Surname")
         ->AddColumn("Email", "E-mail")
         ->Build(); ?>
 
-
     let apiUrl = 'http://localhost:8000/php-test/web-api.php';
-    const store = new DevExpress.data.CustomStore({
+    var store = new DevExpress.data.CustomStore({
         key: "Id",
         load: function (loadOptions) {
-            const deferred = $.Deferred();
+            var deferred = $.Deferred();
             $.get(apiUrl, loadOptions).done(function (response) {
                 response = JSON.parse(response)
                 deferred.resolve({data: response.data, totalCount: response.totalCount});
             });
             return deferred.promise();
-        },
-        insert: function (loadOptions) {
-            console.log(loadOptions)
         }
     });
 
-
     $("#<?=$tableName?>").dxDataGrid({
         dataSource: store,
+        remoteOperations: true,
         onFocusedRowChanged: function (e) {
             const focusedRowKey = e.component.option("focusedRowKey");
             $("#focusedRow").text(focusedRowKey);

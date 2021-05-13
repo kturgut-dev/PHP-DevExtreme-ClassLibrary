@@ -49,7 +49,7 @@ class DevExtremeGridBuilder
         self::$devextremeGrid = '$(function(){' . PHP_EOL;
         self::$devextremeGrid .= 'DevExpress.localization.locale(navigator.language);' . PHP_EOL;
         self::$devextremeGrid .= 'var {{tableName}} = $("#{{tableName}}").dxDataGrid({{DevExtremeGridFormat}});' . PHP_EOL;
-        self::$devextremeGrid .= '})//.dxDataGrid(\'instance\');';
+        self::$devextremeGrid .= '});';
     }
 
     private static function GenerateJavaScriptLibrary(array $libraries): string
@@ -85,13 +85,9 @@ class DevExtremeGridBuilder
         self::$devextremeGrid = $grid;
     }
 
-    public static function Create(string $tableName, string $key = ''): self
+    public static function Create(string $tableName): self
     {
         self::$replaceData["tableName"] = $tableName;
-
-        if (is_string($key) && !empty($key))
-            self::$DevExtremeGridForm["keyExpr"] = $key;
-
         return new self();
     }
 
@@ -104,6 +100,14 @@ class DevExtremeGridBuilder
     // [END]
 
     // [START] DataGridView Operations
+    public static function KeyExpr(string $key = '')
+    {
+        //Only ArrayDataSource use
+        if (is_string($key) && !empty($key))
+            self::$DevExtremeGridForm["keyExpr"] = $key;
+
+        return new self();
+    }
 
     public static function SearchPanel(bool $visible = true, int $width = 240, string $placeHolder = "")
     {
@@ -156,10 +160,6 @@ class DevExtremeGridBuilder
 
     public static function AddDxColumn(DxColumn $dxColumn): self
     {
-//        $col = (array) $dxColumn;
-//        echo $dxColumn->jsonSerialize();
-//        echo print_r((array) $dxColumn);
-
         array_push(self::$columns, $dxColumn->getColumn());
         self::$DevExtremeGridForm["columns"] = (self::$columns);
         return new self();
@@ -178,7 +178,7 @@ class DevExtremeGridBuilder
         return new self();
     }
 
-    public static function GroupPanel(bool $visible, string $emptyText = '')
+    public static function GroupPanel(bool $visible = true, string $emptyText = '')
     {
         self::$DevExtremeGridForm["groupPanel"]["visible"] = $visible;
         if (!empty($emptyText) && is_string($emptyText))
@@ -234,5 +234,42 @@ class DevExtremeGridBuilder
             self::$DevExtremeGridForm["focusedRowEnabled"] = $isActive;
         return new self();
     }
+
+    public static function RemoteOperations(bool $isActive)
+    {
+        //To notify the DataGrid that data is processed on the server, set the remoteOperations property to true.
+        if (is_bool($isActive))
+            self::$DevExtremeGridForm["remoteOperations"] = $isActive;
+
+        return new self();
+    }
+
+    public static function Editing(bool $allowAdding, bool $allowUpdating = false, bool $allowDeleting = false, string $startEditAction = 'dblClick')
+    {
+
+        if (is_bool($allowAdding))
+            self::$DevExtremeGridForm["editing"]["allowAdding"] = $allowAdding;
+
+        if (is_bool($allowUpdating))
+            self::$DevExtremeGridForm["editing"]["allowUpdating"] = $allowUpdating;
+
+        if (is_bool($allowDeleting))
+            self::$DevExtremeGridForm["editing"]["allowDeleting"] = $allowDeleting;
+
+        if (is_string($startEditAction))
+            self::$DevExtremeGridForm["editing"]["startEditAction"] = $startEditAction;
+
+        return new self();
+    }
+
+    public static function EditingMode(string $mode = 'cell') //popup-form-batch-cell
+    {
+        //https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/FormEditing/jQuery/Light/
+        if (is_string($mode))
+            self::$DevExtremeGridForm["editing"]["mode"] = $mode;
+
+        return new self();
+    }
+
     // [END]
 }
