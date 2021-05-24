@@ -1,7 +1,7 @@
 <?php
 
 
-namespace DevExtreme;
+namespace JsBuilder\DevExtreme;
 
 class DxLanguage
 {

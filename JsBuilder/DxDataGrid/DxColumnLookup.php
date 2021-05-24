@@ -1,6 +1,6 @@
 <?php
 
-namespace DevExtreme;
+namespace JsBuilder\DxDataGrid;
 
 class DxColumnLookup
 {

@@ -1,73 +1,25 @@
 <?php
 
-namespace JsBuilder;
+namespace JsBuilder\DxDataGrid;
 
-use DevExtreme\DxColumn;
-use DevExtreme\DxThemes;
-use mysql_xdevapi\Exception;
-
-class DevExtremeGridBuilder
+class DxDataGrid
 {
     // [START] Variables
     private static string $devextremeGrid = "";
-    private static string $theme = DxThemes::Light;
     private static array $replaceData = array(
         "tableName" => "tableName",
     );
     private static array $columns = array();
-    public static string $lang = "en";
-    private static array $DevExtremeGridLibs = array(
-        "https://cdn3.devexpress.com/jslib/20.2.7/css/dx.common.css",
-        "https://cdn3.devexpress.com/jslib/20.2.7/js/dx.all.js",
-    );
     private static array $DevExtremeGridForm = array();
     // [END]
 
     // [START] Custom Operations
-    public static function GetJavaScriptLibrary(): string
-    {
-        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/css/" . self::$theme);
-        array_push(self::$DevExtremeGridLibs, "https://cdn3.devexpress.com/jslib/20.2.7/js/localization/dx.messages." . self::$lang . ".js");
-        return self::GenerateJavaScriptLibrary(self::$DevExtremeGridLibs);
-    }
-
-    public static function SetLang(string $lang)
-    {
-        self::$lang = $lang;
-        return new self();
-    }
-
-    public static function SetTheme(string $theme = '')
-    {
-        if (!is_null($theme) && !empty(trim($theme)))
-            self::$theme = $theme;
-        return new self();
-    }
-
     private static function Initialize_DevExtreme()
     {
         self::$devextremeGrid = '$(function(){' . PHP_EOL;
         self::$devextremeGrid .= 'DevExpress.localization.locale(navigator.language);' . PHP_EOL;
         self::$devextremeGrid .= 'var {{tableName}} = $("#{{tableName}}").dxDataGrid({{DevExtremeGridFormat}});' . PHP_EOL;
         self::$devextremeGrid .= '});';
-    }
-
-    private static function GenerateJavaScriptLibrary(array $libraries): string
-    {
-        array_unshift($libraries, "https://code.jquery.com/jquery-3.5.1.min.js");
-        $headString = "";
-        foreach ($libraries as $value) {
-            $template = "";
-            if (strpos($value, ".js")) {
-                $template = ' <script type="text/javascript" src="{{link}}"></script>' . PHP_EOL;
-            } else {
-                $template = ' <link rel="stylesheet" href="{{link}}">' . PHP_EOL;
-            }
-
-            $headString = $headString . str_replace("{{link}}", $value, $template);
-        }
-
-        return $headString;
     }
 
     private static function Grid_Refresh()
@@ -78,13 +30,32 @@ class DevExtremeGridBuilder
 
         $grid = self::$devextremeGrid;
 
+        if (array_key_exists("onFocusedRowChanged", self::$DevExtremeGridForm)) {
+//            $function = "#!!{{funcName}}()!!#";
+
+//            $grid = json_encode($grid);
+            str_replace('"#!!', '', $grid);
+            str_replace('{{funcName}}', self::$DevExtremeGridForm["onFocusedRowChanged"], $grid);
+            str_replace('!!#"', '', $grid);
+//            echo $string;
+//            die();
+        }
+
         $grid = str_replace("{{DevExtremeGridFormat}}", json_encode(self::$DevExtremeGridForm), $grid);
         foreach (self::$replaceData as $key => $value) {
             $grid = str_replace("{{" . $key . "}}", $value, $grid);
         }
+
+
+
         self::$devextremeGrid = $grid;
     }
 
+    /**
+     * @param string $tableName
+     * @return static
+     * Set parameter and table id
+     */
     public static function Create(string $tableName): self
     {
         self::$replaceData["tableName"] = $tableName;
@@ -267,6 +238,14 @@ class DevExtremeGridBuilder
         //https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/FormEditing/jQuery/Light/
         if (is_string($mode))
             self::$DevExtremeGridForm["editing"]["mode"] = $mode;
+
+        return new self();
+    }
+
+    public static function OnFocusedRowChanged(string $funcName)
+    {
+        if (is_string($funcName))
+            self::$DevExtremeGridForm["onFocusedRowChanged"] = $funcName;
 
         return new self();
     }

@@ -1,17 +1,21 @@
 <?php
-include __DIR__ . '/vendor/autoload.php';
 
-use Helpers\DataGenerator;
-use DevExtreme\DxThemes;
-use DevExtreme\DxColumn;
-use DevExtreme\DxLanguage;
-use JsBuilder\DevExtremeGridBuilder;
+include  '../../vendor/autoload.php';
+
+use JsBuilder\DevExtreme\DevExtreme;
+use JsBuilder\DevExtreme\DxThemes;
+use JsBuilder\DxDataGrid\DxColumn;
+use JsBuilder\DevExtreme\DxLanguage;
+use JsBuilder\DxDataGrid\DxDataGrid;
 
 
 $tableName = "gridView_test";
 
 $idColumn =  new DxColumn("Id", "Kayıt No");
 $idColumn->AllowEditing = false;
+
+
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -23,7 +27,7 @@ $idColumn->AllowEditing = false;
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <?= DevExtremeGridBuilder::SetTheme(DxThemes::MaterialOrangeLight)
+    <?= DevExtreme::SetTheme(DxThemes::MaterialOrangeLight)
         ->SetLang(DxLanguage::Turkish)
         ->GetJavaScriptLibrary() ?>
 
@@ -38,7 +42,7 @@ $idColumn->AllowEditing = false;
 </div>
 
 <script>
-    <?php echo DevExtremeGridBuilder::Create($tableName)
+    <?php echo DxDataGrid::Create($tableName)
         ->SearchPanel()
         ->FilterPanel()
         ->GroupPanel()
@@ -53,6 +57,7 @@ $idColumn->AllowEditing = false;
         ->AddDxColumn($idColumn)
         ->AddColumn("FullName", "Name and Surname")
         ->AddColumn("Email", "E-mail")
+        ->OnFocusedRowChanged("deneme")
         ->Build(); ?>
 
 
@@ -75,11 +80,16 @@ $idColumn->AllowEditing = false;
 
     $("#<?=$tableName?>").dxDataGrid({
         dataSource: store,
-        onFocusedRowChanged: function (e) {
-            const focusedRowKey = e.component.option("focusedRowKey");
-            $("#focusedRow").text(focusedRowKey);
-        }
+        // onFocusedRowChanged: function (e) {
+        //     const focusedRowKey = e.component.option("focusedRowKey");
+        //     $("#focusedRow").text(focusedRowKey);
+        // }
     });
+
+    function deneme(e){
+        console.log(e)
+    }
+
 </script>
 
 <!-- Option 1: Bootstrap Bundle with Popper -->

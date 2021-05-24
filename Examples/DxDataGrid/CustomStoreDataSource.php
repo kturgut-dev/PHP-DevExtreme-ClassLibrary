@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/vendor/autoload.php';
+include  '../../vendor/autoload.php';
 
 use Helpers\DataGenerator;
 use DevExtreme\DxThemes;
