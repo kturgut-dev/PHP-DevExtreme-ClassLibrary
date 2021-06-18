@@ -11,6 +11,7 @@
   "require": {
     "php": ">=7.4"
   },
+  "license": "MIT",
   "autoload": {
     "psr-4": {
       "JsBuilder\\DxDataGrid\\": "JsBuilder/DxDataGrid",
