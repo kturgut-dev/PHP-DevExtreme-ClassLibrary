@@ -1,0 +1,10 @@
+{
+    "name": "kturgut/php-dev-extreme-generater",
+    "type": "library",
+    "authors": [{
+        "name": "Kürşat Turgut",
+        "email": "mail@kursatturgut.com.tr"
+    }],
+    "minimum-stability": "dev",
+    "require": {}
+}
