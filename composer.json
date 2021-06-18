@@ -1,5 +1,6 @@
 {
   "name": "kturgut/php-dev-extreme-generater",
+  "description": "DevExtreme PHP integration.",
   "type": "library",
   "authors": [
     {
@@ -7,6 +8,9 @@
       "email": "mail@kursatturgut.com.tr"
     }
   ],
+  "require": {
+    "php": ">=7.4"
+  },
   "autoload": {
     "psr-4": {
       "JsBuilder\\DxDataGrid\\": "JsBuilder/DxDataGrid",
@@ -15,5 +19,4 @@
     }
   },
   "minimum-stability": "dev",
-  "require": {}
 }
