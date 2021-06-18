@@ -1,10 +1,19 @@
 {
-    "name": "kturgut/php-dev-extreme-generater",
-    "type": "library",
-    "authors": [{
-        "name": "Kürşat Turgut",
-        "email": "mail@kursatturgut.com.tr"
-    }],
-    "minimum-stability": "dev",
-    "require": {}
+  "name": "kturgut/php-dev-extreme-generater",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Kürşat Turgut",
+      "email": "mail@kursatturgut.com.tr"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "JsBuilder\\DxDataGrid\\": "JsBuilder/DxDataGrid",
+      "JsBuilder\\DevExtreme\\": "JsBuilder/DevExtreme",
+      "JsBuilder\\DxNavigationMenu\\": "JsBuilder/DxNavigationMenu"
+    }
+  },
+  "minimum-stability": "dev",
+  "require": {}
 }
