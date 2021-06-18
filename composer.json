@@ -18,5 +18,5 @@
       "JsBuilder\\DxNavigationMenu\\": "JsBuilder/DxNavigationMenu"
     }
   },
-  "minimum-stability": "dev",
+  "minimum-stability": "dev"
 }
